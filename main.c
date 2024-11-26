@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <ncurses.h>
-#include <unistd.h>
 #include "battery.h"
 #include "window.h"
 
@@ -8,14 +7,19 @@ static int raw_main();
 
 int main(void) {
 	//raw_main();
-	int ch;
+	int ch = '0';
 
 	initscr();
+	keypad(stdscr, TRUE);
+	noecho();
+	cbreak();
+	curs_set(0);
+	timeout(200);
 
-	refresh();
 	int tick = 1;
+
 	do {
-		clear();
+		refresh();
 		tick = draw_top_bar(tick);
 		move(2, 1);
 		float battery_level = get_battery_percentage("BAT1");
@@ -23,9 +27,9 @@ int main(void) {
 
 		move(4, 1);
 		float battery_health = get_battery_health("BAT1");
-		printw("Battery health is: %.2f%%", battery_health);
-		refresh();
-		sleep(1);
+		printw("Battery health is: %.2f%%", battery_health);	
+		
+		timeout(500);
 	} while ((ch = getch()) != 'q');
 	endwin();
 	return 0;
