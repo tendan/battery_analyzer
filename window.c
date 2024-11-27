@@ -9,7 +9,7 @@ int draw_top_bar(int tick) {
 	//WINDOW* top_bar_win = newwin(1, max_x, 0, 0);
 	
 	mvprintw(/*top_bar_win,*/ 0, 0, "Battery Analyzer %s", VERSION);
-	//refresh();
+	refresh();
 	//wrefresh(top_bar_win);
 	int pos = max_x - 1;
 

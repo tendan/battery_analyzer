@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ncurses.h>
 #include "battery.h"
+#include "plot.h"
 #include "window.h"
 
 static int raw_main();
@@ -17,10 +18,12 @@ int main(void) {
 	timeout(200);
 
 	int tick = 1;
-
+	WINDOW* plot = NULL;
 	do {
 		refresh();
+		plot = draw_plot(plot, 10, 20);
 		tick = draw_top_bar(tick);
+		wrefresh(plot);
 		move(2, 1);
 		float battery_level = get_battery_percentage("BAT1");
 		printw("Battery level is: %.2f%%", battery_level);
@@ -28,9 +31,10 @@ int main(void) {
 		move(4, 1);
 		float battery_health = get_battery_health("BAT1");
 		printw("Battery health is: %.2f%%", battery_health);	
-		
+			
 		timeout(500);
 	} while ((ch = getch()) != 'q');
+	delwin(plot);
 	endwin();
 	return 0;
 }
