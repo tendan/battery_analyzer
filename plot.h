@@ -5,4 +5,4 @@
 
 WINDOW* draw_plot(WINDOW* instance, int h, int w);
 
-#endif
+#endif // PLOT_H

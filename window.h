@@ -6,4 +6,4 @@
 // Not safe with MT, be careful
 int draw_top_bar(int tick);
 
-#endif
+#endif // WINDOW_H

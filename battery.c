@@ -13,17 +13,16 @@ int read_raw_from_file(char *filepath, char *result_raw_value[]) {
 	//	return -1;
 	//}
 	//size_t char_len = file_stat.st_size * sizeof(char);
-	size_t char_len = 15;
 	char* raw_value = NULL;
-	raw_value = malloc(char_len);
-	if (read(fd, raw_value, char_len) == -1) {
+	raw_value = malloc(CHAR_LEN);
+	if (read(fd, raw_value, CHAR_LEN) == -1) {
 		perror("Failed to read from sysfs file");
 		return -1;
 	}
 	//raw_value = 0;
 	close(fd);
 	*result_raw_value = malloc(strlen(filepath) + sizeof(char));
-	strncpy(*result_raw_value, raw_value, char_len);
+	strncpy(*result_raw_value, raw_value, CHAR_LEN);
 
 	raw_value = 0;
 	free(raw_value);
