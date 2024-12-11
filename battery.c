@@ -1,32 +1,38 @@
 #include "battery.h"
 
 int read_raw_from_file(char *filepath, char *result_raw_value[]) {
+	int status_code = 0;
 	int fd = open(filepath, O_RDONLY);
-	if (fd == -1) {
-		perror(filepath);
-		return -1;
-	}
-	//struct stat file_stat;
-	//int stat_status = fstat(fd, &file_stat);
-	//if (stat_status != 0) {
-	//	perror("Couldn't read sysfs file");
-	//	return -1;
-	//}
-	//size_t char_len = file_stat.st_size * sizeof(char);
+
 	char* raw_value = NULL;
 	raw_value = malloc(CHAR_LEN);
+
+	if (fd == -1) {
+		perror(filepath);
+		status_code = -1;
+		goto cleanup;
+	}
+
 	if (read(fd, raw_value, CHAR_LEN) == -1) {
 		perror("Failed to read from sysfs file");
-		return -1;
+		status_code = -1; // TODO Make it different
+		goto cleanup;
 	}
-	//raw_value = 0;
-	close(fd);
-	*result_raw_value = malloc(strlen(filepath) + sizeof(char));
+
+	// Include scenario where result_raw_value is not NULL
+	*result_raw_value = realloc(*result_raw_value, strlen(filepath) + sizeof(char));
+
+	if (*result_raw_value == NULL) {
+		perror("Failed to allocate read value");
+		status_code = -1; // TODO Make it different
+		goto cleanup;
+	}
 	strncpy(*result_raw_value, raw_value, CHAR_LEN);
 
-	raw_value = 0;
+cleanup:
+	close(fd);
 	free(raw_value);
-	return 0;	
+	return status_code;
 }
 
 int get_file_path(char **dest_path, char *battery_name, char *module_name) {
@@ -35,27 +41,34 @@ int get_file_path(char **dest_path, char *battery_name, char *module_name) {
 	str_size += strlen(battery_name) + sizeof(char);
 	str_size += strlen(module_name);
 
-	*dest_path = malloc(str_size + sizeof(char)); // Include terminating \0
+	// Include scenario where dest_path is not NULL
+	*dest_path = realloc(*dest_path, str_size + sizeof(char)); // Include terminating \0s
+
+	if (*dest_path == NULL) {
+		perror("Failed to allocate destination path");
+		return -1;
+	}
+
 	snprintf(*dest_path, str_size + sizeof(char), "%s/%s/%s", path, battery_name, module_name);
 
 	return 0;
 }
 
 int get_parsed_module_value(char *battery_name, char *module_name) {
-	char *module_full_path;	
+	char *module_full_path = NULL;	
 	int file_status = get_file_path(&module_full_path, battery_name, module_name);
 	
 	if (file_status != 0) {
 		return -1;
 	}
 
-	char *raw_module_value;
+	char *raw_module_value = NULL;
 	int status = read_raw_from_file(module_full_path, &raw_module_value);
 	
 	free(module_full_path);
 
 	if (status != 0) {
-		return -1;
+		return -1; // TODO Make it different
 	}
 
 	int parsed_value = atoi(raw_module_value);
